@@ -7,7 +7,9 @@ import pytest
 
 from generator.config import load_config
 from generator.github_client import fetch_public_profile
+from generator.models import RepositoryData
 from generator.svg import escape_text, svg_document, validate_svg
+from generator.templates.featured_projects import render_featured_projects
 from generator.templates.orbit_header import render_orbit_header
 from generator.templates.stack_map import render_stack_map
 from generator.templates.telemetry import render_telemetry
@@ -29,6 +31,21 @@ def _profile(fixture="github-profile.json"):
         "test-token",
         request_json=lambda _query, _variables, _token: payload,
     )
+
+
+def _profile_with_all_featured_projects():
+    config = _config()
+    profile = _profile()
+    repositories = dict(profile.repositories)
+    for project in config.featured_projects:
+        repositories[project.repository] = RepositoryData(
+            name=project.repository,
+            url=f"https://github.com/nicolas-takimo/{project.repository}",
+            description=f"Remote details for {project.repository}",
+            primary_language="TypeScript",
+            language_bytes={"TypeScript": 100},
+        )
+    return replace(profile, repositories=repositories)
 
 
 def test_orbit_header_is_valid_accessible_svg():
@@ -147,3 +164,34 @@ def test_stack_map_keeps_declared_technologies_when_language_data_is_empty():
     ]
     assert technology_labels == [technology.name for technology in config.technologies]
     assert root.findall(".//*[@data-language]") == []
+
+
+def test_featured_projects_uses_curated_bilingual_copy_and_public_urls():
+    config = _config()
+    svg = render_featured_projects(config, _profile_with_all_featured_projects())
+
+    validate_svg(svg)
+    for project in config.featured_projects:
+        assert project.repository in svg
+        assert project.description_en in svg
+        assert project.description_pt in svg
+        assert project.domain in svg
+        assert f"https://github.com/nicolas-takimo/{project.repository}" in svg
+
+
+def test_featured_projects_keeps_curated_card_when_remote_repository_is_missing():
+    config = _config()
+    profile = replace(_profile(), repositories={})
+
+    svg = render_featured_projects(config, profile)
+    root = ElementTree.fromstring(svg)
+
+    cards = root.findall(".//*[@data-repository]")
+    assert [card.attrib["data-repository"] for card in cards] == [
+        project.repository for project in config.featured_projects
+    ]
+    for project, card in zip(config.featured_projects, cards, strict=True):
+        card_text = "".join(card.itertext())
+        assert project.description_en in card_text
+        assert project.description_pt in card_text
+        assert "data-repository-url" not in card.attrib

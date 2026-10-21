@@ -21,7 +21,10 @@ def svg_document(*, width: int, height: int, title: str, body: str) -> str:
 
 
 def validate_svg(svg: str) -> None:
-    root = ElementTree.fromstring(svg)
+    try:
+        root = ElementTree.fromstring(svg)
+    except ElementTree.ParseError as exc:
+        raise ValueError(f"generated SVG is not valid XML: {exc}") from exc
     if root.tag != "{http://www.w3.org/2000/svg}svg":
         raise ValueError("generated document is not an SVG root")
     if root.attrib.get("role") != "img":
