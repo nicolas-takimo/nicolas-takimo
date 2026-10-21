@@ -117,3 +117,14 @@ def test_workflow_commits_only_when_git_diff_is_nonempty():
     assert commit["if"] == "steps.changes.outputs.changed == 'true'"
     assert "assets/generated/*.svg" in commit["run"]
     assert "[skip ci]" in commit["run"]
+
+
+def test_workflow_rebases_generated_commit_before_push():
+    workflow = _workflow()
+    steps = workflow["jobs"]["generate"]["steps"]
+    commit = next(step for step in steps if step.get("name") == "Commit generated assets")
+
+    rebase_position = commit["run"].find("git pull --rebase origin main")
+    push_position = commit["run"].find("git push")
+    assert rebase_position >= 0
+    assert push_position > rebase_position
