@@ -8,7 +8,7 @@ Engenheiro da Computação criando produtos conectados de ponta a ponta
 **Mobile · Web · IoT · AWS**  
 React Native · Flutter · TypeScript · React · Next.js · Node.js · Python · Firebase
 
-**CTO @ FireTheBox** · Mato Grosso, Brasil  
+**@ FireTheBox** · Mato Grosso, Brasil  
 [GitHub](https://github.com/nicolas-takimo)
 
 </div>
