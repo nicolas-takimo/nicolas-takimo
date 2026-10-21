@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 from collections.abc import Callable
+from datetime import datetime, timezone
 from typing import Any, TypeAlias
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -20,10 +21,10 @@ JsonRequester: TypeAlias = Callable[
 
 _GRAPHQL_URL = "https://api.github.com/graphql"
 _PROFILE_QUERY = """
-query PublicProfile($login: String!) {
+query PublicProfile($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
     followers { totalCount }
-    contributionsCollection {
+    contributionsCollection(from: $from, to: $to) {
       contributionCalendar { totalContributions }
     }
     repositories(
@@ -106,10 +107,11 @@ def _repository(node: dict[str, Any]) -> RepositoryData | None:
         if isinstance(value, str) and value:
             primary_language = value
 
-    language_bytes: dict[str, int] = {}
     languages = node.get("languages")
-    edges = languages.get("edges", []) if isinstance(languages, dict) else []
+    edges = languages.get("edges") if isinstance(languages, dict) else None
+    language_bytes: dict[str, int] | None = None
     if isinstance(edges, list):
+        language_bytes = {}
         for edge in edges:
             if not isinstance(edge, dict):
                 continue
@@ -132,10 +134,35 @@ def fetch_public_profile(
     username: str,
     token: str,
     request_json: JsonRequester | None = None,
+    now: datetime | None = None,
 ) -> PublicProfileData:
     requester = request_json or _default_request_json
+    current_time = now or datetime.now(timezone.utc)
+    if current_time.tzinfo is None:
+        current_time = current_time.replace(tzinfo=timezone.utc)
+    current_time = current_time.astimezone(timezone.utc)
+    year_start = current_time.replace(
+        month=1,
+        day=1,
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+
+    def iso_z(value: datetime) -> str:
+        return value.isoformat(timespec="seconds").replace("+00:00", "Z")
+
     try:
-        payload = requester(_PROFILE_QUERY, {"login": username}, token)
+        payload = requester(
+            _PROFILE_QUERY,
+            {
+                "login": username,
+                "from": iso_z(year_start),
+                "to": iso_z(current_time),
+            },
+            token,
+        )
     except GitHubApiError:
         raise
     except Exception as exc:
@@ -165,10 +192,12 @@ def fetch_public_profile(
     )
 
     repositories_data = user.get("repositories")
-    nodes = repositories_data.get("nodes") if isinstance(repositories_data, dict) else []
+    nodes = repositories_data.get("nodes") if isinstance(repositories_data, dict) else None
+    repositories_available = isinstance(nodes, list)
     repositories: dict[str, RepositoryData] = {}
     totals: defaultdict[str, int] = defaultdict(int)
-    if isinstance(nodes, list):
+    languages_available = repositories_available
+    if repositories_available:
         for raw_node in nodes:
             if not isinstance(raw_node, dict):
                 continue
@@ -176,16 +205,19 @@ def fetch_public_profile(
             if repository is None:
                 continue
             repositories[repository.name] = repository
-            for language, size in repository.language_bytes.items():
-                totals[language] += size
+            if repository.language_bytes is None:
+                languages_available = False
+            else:
+                for language, size in repository.language_bytes.items():
+                    totals[language] += size
 
-    language_bytes = dict(totals)
+    language_bytes = dict(totals) if languages_available else None
     return PublicProfileData(
         username=username,
-        public_repository_count=len(repositories),
+        public_repository_count=len(repositories) if repositories_available else None,
         contributions_year=contributions,
         followers=followers,
-        language_count=len(language_bytes),
+        language_count=len(language_bytes) if language_bytes is not None else None,
         language_bytes=language_bytes,
         repositories=repositories,
     )

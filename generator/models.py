@@ -64,15 +64,15 @@ class RepositoryData:
     url: str
     description: str | None
     primary_language: str | None
-    language_bytes: Mapping[str, int]
+    language_bytes: Mapping[str, int] | None
 
 
 @dataclass(frozen=True, slots=True)
 class PublicProfileData:
     username: str
-    public_repository_count: int
+    public_repository_count: int | None
     contributions_year: int | None
     followers: int | None
-    language_count: int
-    language_bytes: Mapping[str, int]
+    language_count: int | None
+    language_bytes: Mapping[str, int] | None
     repositories: Mapping[str, RepositoryData]

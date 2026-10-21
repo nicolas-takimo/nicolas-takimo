@@ -111,10 +111,16 @@ def test_telemetry_renders_four_verified_public_metrics():
 
 
 def test_telemetry_uses_em_dash_for_none():
-    svg = render_telemetry(_config(), _profile("github-profile-partial.json"))
+    profile = replace(
+        _profile("github-profile-partial.json"),
+        public_repository_count=None,
+        language_count=None,
+        language_bytes=None,
+    )
+    svg = render_telemetry(_config(), profile)
     root = ElementTree.fromstring(svg)
 
-    for metric in ("contributions", "followers"):
+    for metric in ("repositories", "contributions", "followers", "languages"):
         group = root.find(f".//*[@data-metric='{metric}']")
         assert group is not None
         metric_text = "".join(group.itertext())
@@ -151,6 +157,20 @@ def test_stack_map_uses_public_language_bytes_for_bar_proportions():
     assert bars["Python"] > bars["CSS"] >= 4
     assert bars["Python"] / bars["TypeScript"] == pytest.approx(400 / 740, rel=0.01)
     assert all(4 <= width <= 360 for width in bars.values())
+
+
+def test_stack_map_percentages_use_all_public_language_bytes():
+    language_bytes = {f"Language {index}": 100 for index in range(8)}
+    profile = replace(
+        _profile(),
+        language_count=8,
+        language_bytes=language_bytes,
+    )
+
+    svg = render_stack_map(_config(), profile)
+
+    assert svg.count("12.5%") == 7
+    assert "14.3%" not in svg
 
 
 def test_stack_map_keeps_declared_technologies_when_language_data_is_empty():
@@ -208,3 +228,19 @@ def test_featured_projects_wraps_long_repository_names_inside_cards():
     title_lines = long_card.findall(".//*[@data-kind='repository-title']")
     assert len(title_lines) >= 2
     assert all(len("".join(line.itertext())) <= 31 for line in title_lines)
+
+
+@pytest.mark.parametrize(
+    "renderer",
+    [render_telemetry, render_stack_map, render_featured_projects],
+)
+def test_information_panels_keep_text_readable_at_360_pixels(renderer):
+    root = ElementTree.fromstring(renderer(_config(), _profile_with_all_featured_projects()))
+    viewbox_width = float(root.attrib["viewBox"].split()[2])
+    effective_sizes = [
+        float(node.attrib["font-size"]) * 360 / viewbox_width
+        for node in root.findall(".//{http://www.w3.org/2000/svg}text")
+    ]
+
+    assert effective_sizes
+    assert min(effective_sizes) >= 9
