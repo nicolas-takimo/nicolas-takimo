@@ -195,3 +195,16 @@ def test_featured_projects_keeps_curated_card_when_remote_repository_is_missing(
         assert project.description_en in card_text
         assert project.description_pt in card_text
         assert "data-repository-url" not in card.attrib
+
+
+def test_featured_projects_wraps_long_repository_names_inside_cards():
+    svg = render_featured_projects(_config(), _profile_with_all_featured_projects())
+    root = ElementTree.fromstring(svg)
+    long_card = root.find(
+        ".//*[@data-repository='TCC-Controle-de-acesso-remoto-usando-Digiprox-S--202']"
+    )
+
+    assert long_card is not None
+    title_lines = long_card.findall(".//*[@data-kind='repository-title']")
+    assert len(title_lines) >= 2
+    assert all(len("".join(line.itertext())) <= 31 for line in title_lines)

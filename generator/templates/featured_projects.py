@@ -15,6 +15,13 @@ def _lines(text: str, width: int, limit: int) -> list[str]:
     return visible
 
 
+def _title_lines(text: str) -> list[str]:
+    chunks = wrap(text, width=31, break_long_words=True, break_on_hyphens=True)
+    if len(chunks) <= 2:
+        return chunks
+    return [chunks[0], chunks[1].rstrip("- ") + "…"]
+
+
 def render_featured_projects(
     config: ProfileConfig,
     profile: PublicProfileData,
@@ -48,10 +55,10 @@ def render_featured_projects(
                 f'<circle cx="{x + 120}" cy="{y + 30}" r="4" fill="{color}"/>',
             ]
         )
-        title_lines = _lines(project.repository, 31, 2)
+        title_lines = _title_lines(project.repository)
         for line_index, line in enumerate(title_lines):
             parts.append(
-                f'<text x="{x + 120}" y="{y + 59 + line_index * 13}" '
+                f'<text data-kind="repository-title" x="{x + 120}" y="{y + 59 + line_index * 13}" '
                 f'fill="{palette.text}" font-family="Inter,Segoe UI,sans-serif" font-size="10" '
                 f'font-weight="700" text-anchor="middle">{escape_text(line)}</text>'
             )
