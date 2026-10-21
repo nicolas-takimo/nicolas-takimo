@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Mapping
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,3 +56,23 @@ class ProfileConfig:
     technologies: tuple[Technology, ...]
     featured_projects: tuple[FeaturedProject, ...]
     palette: Palette
+
+
+@dataclass(frozen=True, slots=True)
+class RepositoryData:
+    name: str
+    url: str
+    description: str | None
+    primary_language: str | None
+    language_bytes: Mapping[str, int]
+
+
+@dataclass(frozen=True, slots=True)
+class PublicProfileData:
+    username: str
+    public_repository_count: int
+    contributions_year: int | None
+    followers: int | None
+    language_count: int
+    language_bytes: Mapping[str, int]
+    repositories: Mapping[str, RepositoryData]

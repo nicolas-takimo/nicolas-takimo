@@ -1,0 +1,56 @@
+{
+  "data": {
+    "user": {
+      "followers": {"totalCount": 14},
+      "contributionsCollection": {
+        "contributionCalendar": {"totalContributions": 58}
+      },
+      "repositories": {
+        "nodes": [
+          {
+            "name": "gavioes-style-fluxos",
+            "url": "https://github.com/nicolas-takimo/gavioes-style-fluxos",
+            "description": "Interface flows",
+            "isFork": false,
+            "isPrivate": false,
+            "visibility": "PUBLIC",
+            "primaryLanguage": {"name": "TypeScript"},
+            "languages": {
+              "edges": [
+                {"size": 720, "node": {"name": "TypeScript"}},
+                {"size": 80, "node": {"name": "CSS"}}
+              ]
+            }
+          },
+          {
+            "name": "cyberSolana",
+            "url": "https://github.com/nicolas-takimo/cyberSolana",
+            "description": null,
+            "isFork": false,
+            "isPrivate": false,
+            "visibility": "PUBLIC",
+            "primaryLanguage": {"name": "Python"},
+            "languages": {
+              "edges": [
+                {"size": 400, "node": {"name": "Python"}},
+                {"size": 20, "node": {"name": "TypeScript"}}
+              ]
+            }
+          },
+          {
+            "name": "forked-project",
+            "url": "https://github.com/nicolas-takimo/forked-project",
+            "description": "Fork",
+            "isFork": true,
+            "isPrivate": false,
+            "visibility": "PUBLIC",
+            "primaryLanguage": {"name": "HTML"},
+            "languages": {
+              "edges": [{"size": 900, "node": {"name": "HTML"}}]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

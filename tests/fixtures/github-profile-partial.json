@@ -1,0 +1,22 @@
+{
+  "data": {
+    "user": {
+      "followers": {"totalCount": null},
+      "contributionsCollection": null,
+      "repositories": {
+        "nodes": [
+          {
+            "name": "project-with-missing-fields",
+            "url": "https://github.com/nicolas-takimo/project-with-missing-fields",
+            "description": null,
+            "isFork": false,
+            "isPrivate": false,
+            "visibility": "PUBLIC",
+            "primaryLanguage": null,
+            "languages": {"edges": []}
+          }
+        ]
+      }
+    }
+  }
+}
