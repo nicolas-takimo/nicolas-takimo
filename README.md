@@ -1,6 +1,6 @@
 <div align="center">
 
-# Nicolas Gabriel
+# Nícolas Gabriel
 
 **Computer Engineer · Full-Stack Developer**  
 Engenheiro da Computação criando produtos conectados de ponta a ponta
