@@ -1,0 +1,68 @@
+identity:
+  username: nicolas-takimo
+  name: Nicolas Gabriel
+  title_en: Computer Engineer · Full-Stack Developer
+  subtitle_pt: Engenheiro da Computação criando produtos conectados de ponta a ponta
+  company: FireTheBox
+  location: Mato Grosso, Brasil
+  email:
+  linkedin_url:
+  portfolio_url:
+
+domains:
+  - name: Mobile
+    color: "#A855F7"
+  - name: Web
+    color: "#22D3EE"
+  - name: IoT
+    color: "#F59E0B"
+  - name: AWS
+    color: "#22C55E"
+
+technologies:
+  - name: React Native
+    domain: Mobile
+  - name: Flutter
+    domain: Mobile
+  - name: TypeScript
+    domain: Web
+  - name: React
+    domain: Web
+  - name: Next.js
+    domain: Web
+  - name: Node.js
+    domain: Web
+  - name: Python
+    domain: IoT
+  - name: RFID
+    domain: IoT
+  - name: Firebase
+    domain: IoT
+  - name: AWS
+    domain: AWS
+  - name: GitHub Actions
+    domain: AWS
+
+featured_projects:
+  - repository: gavioes-style-fluxos
+    domain: Web
+    description_en: React and TypeScript interface flows for connected fitness products.
+    description_pt: Fluxos de interface em React e TypeScript para produtos fitness conectados.
+  - repository: graze
+    domain: Web
+    description_en: Next.js application exploring smart contracts and modern web architecture.
+    description_pt: Aplicação Next.js explorando contratos inteligentes e arquitetura web moderna.
+  - repository: TCC-Controle-de-acesso-remoto-usando-Digiprox-S--202
+    domain: IoT
+    description_en: Applied research connecting legacy RFID access control to Firebase.
+    description_pt: Pesquisa aplicada conectando controle de acesso RFID legado ao Firebase.
+
+palette:
+  background: "#050914"
+  surface: "#0F172A"
+  text: "#E2E8F0"
+  muted: "#94A3B8"
+  cyan: "#22D3EE"
+  violet: "#A855F7"
+  green: "#22C55E"
+  amber: "#F59E0B"
