@@ -230,17 +230,30 @@ def test_featured_projects_wraps_long_repository_names_inside_cards():
     assert all(len("".join(line.itertext())) <= 31 for line in title_lines)
 
 
-@pytest.mark.parametrize(
-    "renderer",
-    [render_telemetry, render_stack_map, render_featured_projects],
-)
-def test_information_panels_keep_text_readable_at_360_pixels(renderer):
-    root = ElementTree.fromstring(renderer(_config(), _profile_with_all_featured_projects()))
-    viewbox_width = float(root.attrib["viewBox"].split()[2])
-    effective_sizes = [
-        float(node.attrib["font-size"]) * 360 / viewbox_width
-        for node in root.findall(".//{http://www.w3.org/2000/svg}text")
-    ]
+def test_information_panels_use_compact_horizontal_desktop_compositions():
+    config = _config()
+    profile = _profile_with_all_featured_projects()
+    telemetry = ElementTree.fromstring(render_telemetry(config, profile))
+    stack_map = ElementTree.fromstring(render_stack_map(config, profile))
+    featured = ElementTree.fromstring(render_featured_projects(config, profile))
 
-    assert effective_sizes
-    assert min(effective_sizes) >= 9
+    assert telemetry.attrib["viewBox"] == "0 0 850 180"
+    assert stack_map.attrib["viewBox"] == "0 0 850 330"
+    assert featured.attrib["viewBox"] == "0 0 850 300"
+
+    metric_groups = telemetry.findall(".//*[@data-metric]")
+    metric_centers = {
+        group.find("{http://www.w3.org/2000/svg}text").attrib["x"]
+        for group in metric_groups
+    }
+    assert len(metric_centers) == 4
+
+    domain_cards = stack_map.findall(".//*[@data-kind='domain']")
+    assert all(float(label.attrib["x"]) >= 468 for label in domain_cards)
+
+    project_cards = featured.findall(".//*[@data-repository]")
+    card_x_positions = {
+        card.find("{http://www.w3.org/2000/svg}rect").attrib["x"]
+        for card in project_cards
+    }
+    assert len(card_x_positions) == 3
